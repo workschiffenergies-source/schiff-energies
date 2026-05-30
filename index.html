@@ -1095,11 +1095,51 @@
   });
 
   // Form submit
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     const msg = document.getElementById('form-msg');
-    msg.style.display = 'block';
-    setTimeout(() => { msg.style.display = 'none'; }, 5000);
+    const btn = e.target;
+
+    const firstName = document.querySelectorAll('input[type="text"]')[0].value;
+    const lastName  = document.querySelectorAll('input[type="text"]')[1].value;
+    const email     = document.querySelector('input[type="email"]').value;
+    const phone     = document.querySelector('input[type="tel"]').value;
+    const product   = document.querySelector('select').value;
+    const message   = document.querySelector('textarea').value;
+
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+
+    try {
+      const res = await fetch('https://formspree.io/f/meedwgvg', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          name: firstName + ' ' + lastName,
+          email, phone, product, message
+        })
+      });
+
+      if (res.ok) {
+        msg.style.color = 'var(--lime)';
+        msg.textContent = '✓ Message sent! We\'ll get back to you within 24 hours.';
+        msg.style.display = 'block';
+        // Clear form fields
+        document.querySelectorAll('input, textarea, select').forEach(el => el.value = '');
+      } else {
+        msg.style.color = '#e74c3c';
+        msg.textContent = '✗ Something went wrong. Please email us directly.';
+        msg.style.display = 'block';
+      }
+    } catch (err) {
+      msg.style.color = '#e74c3c';
+      msg.textContent = '✗ Network error. Please try again.';
+      msg.style.display = 'block';
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Send Enquiry →';
+    setTimeout(() => { msg.style.display = 'none'; }, 6000);
   }
 
   // Nav background on scroll
